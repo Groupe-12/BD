@@ -1,0 +1,69 @@
+from flask_login import UserMixin /*登陆管理*/
+from werkzeug.security import generate_password_hash,check_password_hash
+from app import db ,login /*从前边导入的*/
+import datetime
+
+
+class UserModels(UserMixin,db.Model):
+
+    id = db.Column(db.Integer, primary_key=True)<!--索引--!>
+    email = db.Column(db.String(64), index=True, unique=True)
+    pwd = db.Column(db.String(128))
+
+    first_name = db.Column(db.String, default="")
+    last_name = db.Column(db.String, default="")
+
+    create_date = db.Column(db.DateTime, default=datetime.datetime.now)
+/*python初始化语法*/
+    def __init__(self, email):
+        self.email = email
+/*注册明文的密码，变成了加密的字符串*/
+    def set_user_password(self, pwd):
+        self.pwd = generate_password_hash(pwd)
+/*获取加密密码*/
+    def get_user_password(self, pwd):
+        return generate_password_hash(pwd)
+/*验证用户密码*/
+    def verify_user_password(self, pwd):
+        if self.pwd is None:
+            return False
+        return check_password_hash(self.pwd, pwd)#一个功能，pwd用户输入密码，self。pwd数据库，看是否匹配
+
+
+class FoodModels(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    pic = db.Column(db.String, default="")
+    name = db.Column(db.String, default="")
+    price = db.Column(db.String, default="")
+    desc = db.Column(db.Text, default="")
+    comm = db.Column(db.Text, default="")
+
+
+class CollectModels(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(UserModels.id))#关联了用户
+    food_id = db.Column(db.Integer, db.ForeignKey(FoodModels.id))
+    sock_status = db.Column(db.Boolean, default=True)#用不到
+
+class NoteModels(db.Model):#评论
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey(UserModels.id))
+    prenoom = db.Column(db.String, default="")
+    email = db.Column(db.String, default="")
+    subject = db.Column(db.String, default="")
+    message = db.Column(db.Text, default="")
+
+class EntreeModels(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, default="")
+    desc = db.Column(db.Text, default="")
+
+class PlatModels(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, default="")
+    desc = db.Column(db.Text, default="")
+
+class DessertModels(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, default="")
+    desc = db.Column(db.Text, default="")
